@@ -1,0 +1,44 @@
+import express from "express";
+import {
+  AddProduct,
+  DeleteProduct,
+  GetAllProducts,
+  UpdateProduct,
+} from "../controllers/ProductController.js";
+import uploadImageToCloudinary from "../helper/uploadImageToCloudinary.js";
+import multer from "multer";
+// import multer from "multer";
+
+const router = express.Router();
+
+// Configure Multer for file upload
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads/"); // Specify the destination directory for uploaded files
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, Date.now() + "-" + file.originalname); // Generate a unique filename for the uploaded file
+//   },
+// });
+
+// const upload = multer({ storage });
+
+// // Error handling middleware
+// router.use((err, req, res, next) => {
+//   console.error(err.stack);
+//   res.status(500).json({ success: false, message: "Internal Server Error" });
+// });
+var uploader = multer({
+  storage: multer.diskStorage({}),
+  limits: { fileSize: 50000000 },
+});
+
+// Routes
+
+router.post("/upload", uploader.single("file"), uploadImageToCloudinary);
+router.post("/new", AddProduct);
+router.get("/all", GetAllProducts);
+router.put("/update/:productId", UpdateProduct);
+router.delete("/delete/:productId", DeleteProduct);
+
+export default router;
