@@ -1,10 +1,12 @@
 import React from "react";
-
+import { FaRegUserCircle } from "react-icons/fa";
 const Header = () => {
   return (
-    <header className="h-[60px] bg-gray-50 px-12 py-3 border-b border-gray-200 flex justify-between items-center text-gray-800">
-      <div>DigitalFlake</div>
-      <div>Logout</div>
+    <header className="h-[60px] bg-[#662671] px-12 py-3 border-b border-gray-200 flex justify-between items-center text-white">
+      <div className="font-semibold">DigitalFlake</div>
+      <div>
+        <FaRegUserCircle className="text-xl" />
+      </div>
     </header>
   );
 };

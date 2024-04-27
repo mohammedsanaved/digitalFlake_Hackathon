@@ -1,11 +1,13 @@
 import { NavLink } from "react-router-dom";
 import {
-  HiOutlineCalendarDays,
-  HiOutlineCog6Tooth,
+  // HiOutlineCalendarDays,
+  // HiOutlineCog6Tooth,
   HiOutlineHome,
-  HiOutlineHomeModern,
-  HiOutlineUsers,
+  // HiOutlineHomeModern,
+  // HiOutlineUsers,
 } from "react-icons/hi2";
+import { BiCategory } from "react-icons/bi";
+import { LuPackage } from "react-icons/lu";
 
 function Sidebar() {
   return (
@@ -23,7 +25,7 @@ function Sidebar() {
         className="flex items-center gap-3 py-3 px-6 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-50"
         activeClassName="text-brand-600"
       >
-        <HiOutlineCalendarDays className="w-6 h-6" />
+        <BiCategory className="w-6 h-6" />
         <span>Category</span>
       </NavLink>
       <NavLink
@@ -31,7 +33,7 @@ function Sidebar() {
         className="flex items-center gap-3 py-3 px-6 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-50"
         activeClassName="text-brand-600"
       >
-        <HiOutlineHomeModern className="w-6 h-6" />
+        <LuPackage className="w-6 h-6" />
         <span>Products</span>
       </NavLink>
     </nav>
