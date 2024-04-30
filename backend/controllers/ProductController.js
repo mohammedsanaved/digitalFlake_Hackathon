@@ -1,17 +1,24 @@
 // import multer from "multer";
 import ProductModel from "../models/ProductModel.js";
-import uploadImageToCloudinary from "../helper/uploadImageToCloudinary.js";
+// import uploadImageToCloudinary from "../helper/uploadImageToCloudinary.js";
+import uploadFiletoCloudinary from "../utils/uploadFiletoCloudinary.js";
 
 // var uploader = multer({
 //   storage: multer.diskStorage({}),
 //   limits: { fileSize: 50000000 },
 // });
-
 export const AddProduct = async (req, res, next) => {
   try {
     const { name, packSize, MRP, category } = req.body;
 
-    const productImage = await uploadImageToCloudinary(file);
+    // Check if file is provided
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "File is required" });
+    }
+
+    const productImage = await uploadFiletoCloudinary(req.file);
 
     const newProduct = new ProductModel({
       name,
@@ -32,6 +39,7 @@ export const AddProduct = async (req, res, next) => {
     next(error);
   }
 };
+
 
 export const GetAllProducts = async (req, res, next) => {
   try {

@@ -5,9 +5,8 @@ import {
   GetAllProducts,
   UpdateProduct,
 } from "../controllers/ProductController.js";
-import uploadImageToCloudinary from "../helper/uploadImageToCloudinary.js";
-import multer from "multer";
-// import multer from "multer";
+import { upload } from "../middlewares/multerMiddleware.js";
+import uploadFiletoCloudinary from "../utils/uploadFiletoCloudinary.js";
 
 const router = express.Router();
 
@@ -28,15 +27,27 @@ const router = express.Router();
 //   console.error(err.stack);
 //   res.status(500).json({ success: false, message: "Internal Server Error" });
 // });
-var uploader = multer({
-  storage: multer.diskStorage({}),
-  limits: { fileSize: 50000000 },
-});
+// var uploader = multer({
+//   storage: multer.diskStorage({}),
+//   limits: { fileSize: 50000000 },
+// });
 
 // Routes
 
-router.post("/upload", uploader.single("file"), uploadImageToCloudinary);
-router.post("/new", AddProduct);
+router.post(
+  "/new",
+  upload.single("file"),
+  async (req, res, next) => {
+    try {
+      const productImage = await uploadFiletoCloudinary(req);
+      req.body.file = productImage; // Add uploaded file to request body
+      next(); // Move to the next middleware
+    } catch (error) {
+      next(error);
+    }
+  },
+  AddProduct
+);
 router.get("/all", GetAllProducts);
 router.put("/update/:productId", UpdateProduct);
 router.delete("/delete/:productId", DeleteProduct);
