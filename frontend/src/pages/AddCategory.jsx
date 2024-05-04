@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 
 const AddCategory = () => {
+  const [categoryName, setCategoryName] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("Status");
   return (
     <>
       <div className="max-w-[100%] mx-auto p-6 bg-white shadow-md rounded-lg h-[100%]">
@@ -22,6 +26,8 @@ const AddCategory = () => {
                 type="text"
                 name="CategoryName"
                 id="CategoryName"
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 placeholder="Category Name"
               />
@@ -37,8 +43,10 @@ const AddCategory = () => {
               </label>
               <input
                 type="text"
-                name="productName"
-                id="productName"
+                name="description"
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 placeholder="Description"
               />
@@ -53,62 +61,18 @@ const AddCategory = () => {
               <select
                 id="category"
                 name="category"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
-                <option selected>Status</option>
-                <option>Active</option>
-                <option>inActive</option>
+                <option value={"Status"} selected>
+                  Status
+                </option>
+                <option value={"active"}>Active</option>
+                <option value={"inactive"}>inActive</option>
               </select>
             </div>
           </div>
-          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"> */}
-          {/* <div>
-              <label
-                htmlFor="mrp"
-                className="block text-sm font-medium text-zinc-700"
-              >
-                MRP
-              </label>
-              <input
-                type="text"
-                name="mrp"
-                id="mrp"
-                className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                placeholder="MRP"
-              />
-            </div> */}
-          {/* <div>
-              <label
-                htmlFor="productImage"
-                className="block text-sm font-medium text-zinc-700"
-              >
-                Product Image
-              </label>
-              <input
-                type="file"
-                name="productImage"
-                id="productImage"
-                className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-              />
-            </div> */}
-          {/* <div>
-              <label
-                htmlFor="status"
-                className="block text-sm font-medium text-zinc-700"
-              >
-                Status
-              </label>
-              <select
-                id="status"
-                name="status"
-                className="mt-1 block w-full py-2 px-3 border border-zinc-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-              >
-                <option selected>Choose a status</option>
-                <option>Active</option>
-                <option>inActive</option>
-              </select>
-            </div> */}
-          {/* </div> */}
           <div className="flex justify-end gap-4">
             <button className="py-2 px-4 rounded-lg bg-slate-100">
               Cancel
