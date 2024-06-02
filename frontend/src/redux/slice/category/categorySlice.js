@@ -97,6 +97,21 @@ const categorySlice = createSlice({
       .addCase(fetchCategoryById.rejected, (state) => {
         state.isLoading = false;
         state.isError = true;
+      })
+      .addCase(deleteCategory.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+      })
+      .addCase(deleteCategory.fulfilled, (state, action) => {
+        state.isError = false;
+        state.isLoading = false;
+        state.categories = state?.categories?.filter(
+          (category) => category.id !== action.payload.id
+        );
+      })
+      .addCase(deleteCategory.rejected, (state) => {
+        state.isLoading = false;
+        state.isError = true;
       });
   },
 });

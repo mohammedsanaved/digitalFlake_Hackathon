@@ -3,7 +3,11 @@ import { BiCategory } from "react-icons/bi";
 import { FaEdit, FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllCategory } from "../redux/slice/category/categorySlice";
+import {
+  deleteCategory,
+  getAllCategory,
+} from "../redux/slice/category/categorySlice";
+import { ToastError } from "../components/UI/Toast";
 
 const Category = () => {
   const navigate = useNavigate();
@@ -18,6 +22,10 @@ const Category = () => {
 
   const handleRoute = () => {
     navigate("/category/new");
+  };
+  const handleDelete = (id) => {
+    dispatch(deleteCategory(id));
+    ToastError("Delete Successfully");
   };
 
   return (
@@ -83,6 +91,8 @@ const Category = () => {
                   Error: {isError}
                 </td>
               </tr>
+            ) : categories?.categories?.length === 0 ? (
+              <div className="p-3">You Need to Add the Category</div>
             ) : (
               categories?.categories?.map((item, i) => (
                 <tr key={i}>
@@ -110,7 +120,10 @@ const Category = () => {
                       />
                     </span>
                     <span className="p-2 hover:bg-red-200 hover:shadow-lg duration-300 rounded-xl cursor-pointer">
-                      <FaRegTrashAlt className="text-xl duration-300 text-red-500" />
+                      <FaRegTrashAlt
+                        className="text-xl duration-300 text-red-500"
+                        onClick={() => handleDelete(item._id)}
+                      />
                     </span>
                   </td>
                 </tr>
