@@ -1,39 +1,39 @@
-// import React from "react";
-
+import { useEffect } from "react";
 import { BiCategory } from "react-icons/bi";
 import { FaEdit, FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
 import { getAllCategory } from "../redux/slice/category/categorySlice";
 
 const Category = () => {
   const navigate = useNavigate();
-  const handleRoute = () => {
-    navigate("/category/new");
-  };
   const dispatch = useDispatch();
-  const allCategory = useSelector((state) => state.category);
-  // console.log(allCategory);
-  const { categories, isLoading, isError } = allCategory;
+  const { categories, isLoading, isError } = useSelector(
+    (state) => state.category
+  );
 
   useEffect(() => {
     dispatch(getAllCategory());
   }, [dispatch]);
+
+  const handleRoute = () => {
+    navigate("/category/new");
+  };
+
   return (
     <>
-      <div className="flex justify-between items-center shadow-lg p-4 rounded-lg">
-        <div className="flex gap-2">
+      <div className="flex justify-between items-center shadow-lg p-4 bg-white rounded-lg">
+        <div className="flex gap-2 items-center">
           <BiCategory className="text-2xl" />
-          <div className="font-bold">Category</div>
-          {/* Apply font-bold for header */}
+          <div className="font-bold text-lg">Category</div>
         </div>
-        <div className="border rounded-lg">
+        <div className="border rounded-lg overflow-hidden">
           <input
             type="text"
             name=""
             id=""
-            className="border border-none px-3 w-[100%] py-2 rounded-lg"
+            className="border-none px-3 py-2 w-full"
+            placeholder="Search..."
           />
         </div>
         <div>
@@ -41,42 +41,84 @@ const Category = () => {
             className="bg-[#662671] hover:bg-[#662669] text-white font-bold py-2 px-4 rounded"
             onClick={handleRoute}
           >
-            Add New {/* Apply button styles */}
+            Add New
           </button>
         </div>
       </div>
-      <div className="mt-3 h-auto bg-blue-300 grid grid-cols-4 p-4 items-center">
-        <div className="font-bold">ID</div>
-        <div className="font-bold">Name</div>
-        <div className="font-bold">Description</div>
-        <div className="font-bold">Status</div>
+
+      <div className="overflow-x-auto rounded-lg border border-gray-200 mt-3">
+        <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+          <thead className="text-left">
+            <tr>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                ID
+              </th>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                Name
+              </th>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                Description
+              </th>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan="4"
+                  className="whitespace-nowrap px-4 py-2 text-center text-gray-700"
+                >
+                  Loading...
+                </td>
+              </tr>
+            ) : isError ? (
+              <tr>
+                <td
+                  colSpan="4"
+                  className="whitespace-nowrap px-4 py-2 text-center text-gray-700"
+                >
+                  Error: {isError}
+                </td>
+              </tr>
+            ) : (
+              categories?.categories?.map((item, i) => (
+                <tr key={i}>
+                  <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {i + 1}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {item.categoryName}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+                    {item.description}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2 flex gap-6 items-center">
+                    <span
+                      style={{
+                        color: item.status === "active" ? "green" : "red",
+                      }}
+                    >
+                      {item.status}
+                    </span>
+                    <span className="p-2 hover:bg-blue-100 hover:shadow-lg rounded-xl duration-300 cursor-pointer">
+                      <FaEdit
+                        className="text-xl duration-300 text-blue-400"
+                        onClick={() => navigate(`/category/${item._id}`)}
+                      />
+                    </span>
+                    <span className="p-2 hover:bg-red-200 hover:shadow-lg duration-300 rounded-xl cursor-pointer">
+                      <FaRegTrashAlt className="text-xl duration-300 text-red-500" />
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : isError ? (
-        <div>Error: {isError}</div>
-      ) : (
-        categories?.categories?.map((item, i) => (
-          <div className="p-4 grid grid-cols-4 mt-3 bg-slate-200" key={i}>
-            <div>{i + 1}</div>
-            <div>{item.categoryName}</div>
-            <div>{item.description}</div>
-            <div className="flex gap-6 items-center">
-              <span
-                style={{ color: item.status === "active" ? "green" : "red" }}
-              >
-                {item.status}
-              </span>
-              <span className="p-2 hover:bg-slate-300 rounded-xl cursor-pointer">
-                <FaEdit className="text-xl  duration-300 text-blue-400 " />
-              </span>
-              <span className="p-2 hover:bg-slate-300 rounded-xl cursor-pointer">
-                <FaRegTrashAlt className="text-xl  duration-300  text-red-500" />
-              </span>
-            </div>
-          </div>
-        ))
-      )}
     </>
   );
 };

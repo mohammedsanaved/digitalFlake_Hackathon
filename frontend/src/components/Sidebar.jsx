@@ -11,7 +11,7 @@ import { LuPackage } from "react-icons/lu";
 
 function Sidebar() {
   return (
-    <nav className="space-y-2 bg-slate-200">
+    <nav className="space-y-2 bg-slate-200 p-4">
       <NavLink
         to="/home"
         className="flex items-center gap-3 py-3 px-6 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-50"

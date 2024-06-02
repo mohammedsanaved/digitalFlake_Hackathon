@@ -1,12 +1,23 @@
-// import multer from "multer";
 import ProductModel from "../models/ProductModel.js";
-// import uploadImageToCloudinary from "../helper/uploadImageToCloudinary.js";
-import uploadFiletoCloudinary from "../utils/uploadFiletoCloudinary.js";
+import cloudinary from "cloudinary";
 
-// var uploader = multer({
-//   storage: multer.diskStorage({}),
-//   limits: { fileSize: 50000000 },
-// });
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
+
+// Helper function to upload file to Cloudinary
+const uploadFiletoCloudinary = async (file) => {
+  const result = await cloudinary.uploader.upload(file.path);
+  return {
+    url: result.secure_url,
+    public_id: result.public_id,
+  };
+};
+
+// Add Product
 export const AddProduct = async (req, res, next) => {
   try {
     const { name, packSize, MRP, category } = req.body;
@@ -18,18 +29,25 @@ export const AddProduct = async (req, res, next) => {
         .json({ success: false, message: "File is required" });
     }
 
+    // Upload image to Cloudinary
     const productImage = await uploadFiletoCloudinary(req.file);
 
+    // Create a new product
     const newProduct = new ProductModel({
       name,
       packSize,
       MRP,
-      productImage,
+      image: {
+        url: productImage.url,
+        public_id: productImage.public_id,
+      },
       category,
     });
 
+    // Save the product to the database
     const savedProduct = await newProduct.save();
 
+    // Respond with success
     res.status(201).json({
       success: true,
       message: "Product created successfully",
@@ -40,7 +58,7 @@ export const AddProduct = async (req, res, next) => {
   }
 };
 
-
+// Get All Products
 export const GetAllProducts = async (req, res, next) => {
   try {
     // Retrieve all products from the database
@@ -57,14 +75,28 @@ export const GetAllProducts = async (req, res, next) => {
   }
 };
 
+// Update Product
 export const UpdateProduct = async (req, res, next) => {
   try {
     const { productId } = req.params;
-    const { name, packSize, MRP, productImage, category } = req.body;
+    const { name, packSize, MRP, category } = req.body;
 
+    // Check if a new file is provided for the update
+    let updatedData = { name, packSize, MRP, category };
+
+    if (req.file) {
+      // Upload new image to Cloudinary
+      const productImage = await uploadFiletoCloudinary(req.file);
+      updatedData.image = {
+        url: productImage.url,
+        public_id: productImage.public_id,
+      };
+    }
+
+    // Update the product
     const updatedProduct = await ProductModel.findByIdAndUpdate(
       productId,
-      { name, packSize, MRP, productImage, category },
+      updatedData,
       { new: true, runValidators: true }
     );
 
@@ -85,11 +117,17 @@ export const UpdateProduct = async (req, res, next) => {
   }
 };
 
+// Delete Product
 export const DeleteProduct = async (req, res, next) => {
   try {
     const { productId } = req.params;
 
     const deletedProduct = await ProductModel.findByIdAndDelete(productId);
+
+    // Remove image from Cloudinary
+    if (deletedProduct.image && deletedProduct.image.public_id) {
+      await cloudinary.uploader.destroy(deletedProduct.image.public_id);
+    }
 
     if (!deletedProduct) {
       return res.status(404).json({

@@ -1,11 +1,19 @@
 import { FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const AddProduct = () => {
+  const navigate = useNavigate();
   return (
     <>
       <div className="max-w-[100%] mx-auto p-6 bg-white shadow-md rounded-lg h-[100%]">
-        <div className="flex items-center justify-start gap-3 mb-6">
-          <FaArrowLeft />
+        <div
+          className="flex items-center justify-start gap-3 mb-6"
+          // onClick={navigate("/product")}
+        >
+          <FaArrowLeft
+            onClick={() => navigate("/product")}
+            className="cursor-pointer"
+          />
           <h2 className="text-xl font-semibold text-zinc-800">Add Product</h2>
           <span></span>
         </div>
