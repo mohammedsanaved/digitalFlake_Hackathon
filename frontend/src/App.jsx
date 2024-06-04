@@ -8,6 +8,7 @@ import AddProduct from "./pages/AddProduct";
 import AddCategory from "./pages/AddCategory";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Register from "./pages/Register";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="category/:id" element={<AddCategory />} />
           </Route>
           <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
         </Routes>
       </BrowserRouter>
     </>

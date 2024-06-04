@@ -39,11 +39,12 @@ const AddCategory = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const newCategory = { categoryName, description, status: selectedStatus };
+    console.log(newCategory, "New ID--------------->");
     if (id) {
       dispatch(updateCategory({ id, updatedCategory: newCategory }));
-      setCategoryName("");
-      setDescription("");
-      setSelectedStatus("");
+      // setCategoryName("");
+      // setDescription("");
+      // setSelectedStatus("");
       ToastSuccess("Category Update Successfully");
     } else {
       dispatch(addCategory(newCategory));

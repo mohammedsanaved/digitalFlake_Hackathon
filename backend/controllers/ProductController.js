@@ -1,21 +1,22 @@
 import ProductModel from "../models/ProductModel.js";
-import cloudinary from "cloudinary";
+import uploadFiletoCloudinary from "../utils/uploadFiletoCloudinary.js";
+// import { v2 as cloudinary } from "cloudinary";
 
 // Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.CLOUDINARY_KEY,
-  api_secret: process.env.CLOUDINARY_SECRET,
-});
+// cloudinary.config({
+//   cloud_name: process.env.CLOUDINARY_NAME,
+//   api_key: process.env.CLOUDINARY_KEY,
+//   api_secret: process.env.CLOUDINARY_SECRET,
+// });
 
-// Helper function to upload file to Cloudinary
-const uploadFiletoCloudinary = async (file) => {
-  const result = await cloudinary.uploader.upload(file.path);
-  return {
-    url: result.secure_url,
-    public_id: result.public_id,
-  };
-};
+// // Helper function to upload file to Cloudinary
+// const uploadFiletoCloudinary = async (file) => {
+//   const result = await cloudinary.uploader.upload(file.path);
+//   return {
+//     url: result.secure_url,
+//     public_id: result.public_id,
+//   };
+// };
 
 // Add Product
 export const AddProduct = async (req, res, next) => {
@@ -31,6 +32,7 @@ export const AddProduct = async (req, res, next) => {
 
     // Upload image to Cloudinary
     const productImage = await uploadFiletoCloudinary(req.file);
+    console.log("Image----------------------->", productImage);
 
     // Create a new product
     const newProduct = new ProductModel({
@@ -43,9 +45,11 @@ export const AddProduct = async (req, res, next) => {
       },
       category,
     });
+    console.log("newProduct------------------------------->", newProduct);
 
     // Save the product to the database
     const savedProduct = await newProduct.save();
+    console.log("savedProduct------------------------------->", savedProduct);
 
     // Respond with success
     res.status(201).json({

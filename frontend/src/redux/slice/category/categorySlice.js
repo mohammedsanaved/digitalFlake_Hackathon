@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// Thunks
 export const getAllCategory = createAsyncThunk("category/getAll", async () => {
   const response = await axios.get("http://localhost:8000/api/v1/category/all");
-  return response.data;
+  return response.data.categories; // Adjust this if the data structure is different
 });
 
 export const fetchCategoryById = createAsyncThunk(
@@ -27,7 +28,7 @@ export const addCategory = createAsyncThunk(
       "http://localhost:8000/api/v1/category/new",
       newCategory
     );
-    return response.data;
+    return response.data.category; // Adjust this if the data structure is different
   }
 );
 
@@ -38,23 +39,23 @@ export const updateCategory = createAsyncThunk(
       `http://localhost:8000/api/v1/category/update/${id}`,
       updatedCategory
     );
-    return response.data;
+    // dispatch(getAllCategory())
+    return response.data.category; // Adjust this if the data structure is different
   }
 );
 
 export const deleteCategory = createAsyncThunk(
   "category/delete",
-  async (id) => {
-    const response = await axios.delete(
-      `http://localhost:8000/api/v1/category/delete/${id}`
-    );
-    return response.data;
+  async (id, { dispatch }) => {
+    await axios.delete(`http://localhost:8000/api/v1/category/delete/${id}`);
+    dispatch(getAllCategory());
+    return { id };
   }
 );
 
 const initialState = {
   categories: [],
-  category: null, // New state variable to store the fetched category
+  category: null,
   isError: false,
   isLoading: false,
 };
@@ -66,6 +67,7 @@ const categorySlice = createSlice({
     builder
       .addCase(getAllCategory.pending, (state) => {
         state.isLoading = true;
+        state.isError = false;
       })
       .addCase(getAllCategory.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -75,9 +77,24 @@ const categorySlice = createSlice({
         state.isLoading = false;
         state.isError = action.error.message;
       })
+      .addCase(fetchCategoryById.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+      })
+      .addCase(fetchCategoryById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.category = action.payload;
+      })
+      .addCase(fetchCategoryById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = action.error.message;
+      })
+      .addCase(addCategory.fulfilled, (state, action) => {
+        state.categories.push(action.payload);
+      })
       .addCase(updateCategory.fulfilled, (state, action) => {
         const updatedCategory = action.payload;
-        const index = state?.categories?.findIndex(
+        const index = state.categories.findIndex(
           (category) => category.id === updatedCategory.id
         );
 
@@ -85,33 +102,20 @@ const categorySlice = createSlice({
           state.categories[index] = updatedCategory;
         }
       })
-      // Reducer case for fetching a category by ID
-      .addCase(fetchCategoryById.pending, (state) => {
-        state.isLoading = true;
-        state.isError = false;
-      })
-      .addCase(fetchCategoryById.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.category = action.payload; // Store the fetched category
-      })
-      .addCase(fetchCategoryById.rejected, (state) => {
-        state.isLoading = false;
-        state.isError = true;
-      })
       .addCase(deleteCategory.pending, (state) => {
         state.isLoading = true;
         state.isError = false;
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {
-        state.isError = false;
         state.isLoading = false;
-        state.categories = state?.categories?.filter(
+        state.isError = false;
+        state.categories = state.categories.filter(
           (category) => category.id !== action.payload.id
         );
       })
-      .addCase(deleteCategory.rejected, (state) => {
+      .addCase(deleteCategory.rejected, (state, action) => {
         state.isLoading = false;
-        state.isError = true;
+        state.isError = action.error.message;
       });
   },
 });

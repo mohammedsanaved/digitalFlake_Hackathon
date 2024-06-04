@@ -5,7 +5,7 @@ import {
   GetAllProducts,
   UpdateProduct,
 } from "../controllers/ProductController.js";
-import { upload } from "../middlewares/multerMiddleware.js";
+// import upload from "../middlewares/multerMiddleware.js";
 import uploadFiletoCloudinary from "../utils/uploadFiletoCloudinary.js";
 
 const router = express.Router();
@@ -36,10 +36,11 @@ const router = express.Router();
 
 router.post(
   "/new",
-  upload.single("file"),
+  // upload.single("file"),
   async (req, res, next) => {
     try {
       const productImage = await uploadFiletoCloudinary(req);
+      console.log(productImage, "image-------------------------------->");
       req.body.file = productImage; // Add uploaded file to request body
       next(); // Move to the next middleware
     } catch (error) {

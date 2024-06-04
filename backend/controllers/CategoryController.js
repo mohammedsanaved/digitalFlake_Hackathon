@@ -79,11 +79,9 @@ export const DeleteCategory = async (req, res, next) => {
 
 export const GetAllCategories = async (req, res, next) => {
   try {
-    const categories = await CategoryModel.find();
-
     res.status(200).json({
       success: true,
-      categories,
+      ...res.PaginationResult,
     });
   } catch (error) {
     next(error);
@@ -112,3 +110,25 @@ export const GetCategoryById = async (req, res, next) => {
   }
 };
 
+
+// const page = parseInt(req.query.page);
+    // const limit = parseInt(req.query.limit);
+
+    // const startIndex = (page - 1) * limit;
+    // const endIndex = page * limit;
+
+    // const categories = await CategoryModel.find();
+    // const results = {};
+
+    // if (endIndex < CategoryModel.length)
+    //   results.next = {
+    //     page: page + 1,
+    //     limit: limit,
+    //   };
+    // if (startIndex > 0) {
+    //   results.previous = {
+    //     page: page - 1,
+    //     limit: limit,
+    //   };
+    // }
+    // results.rows = categories.slice(startIndex, endIndex);

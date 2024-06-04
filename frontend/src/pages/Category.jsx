@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BiCategory } from "react-icons/bi";
 import { FaEdit, FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +7,7 @@ import {
   deleteCategory,
   getAllCategory,
 } from "../redux/slice/category/categorySlice";
-import { ToastError } from "../components/UI/Toast";
+import { ToastSuccess, ToastError } from "../components/UI/Toast";
 
 const Category = () => {
   const navigate = useNavigate();
@@ -15,6 +15,9 @@ const Category = () => {
   const { categories, isLoading, isError } = useSelector(
     (state) => state.category
   );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     dispatch(getAllCategory());
@@ -23,9 +26,32 @@ const Category = () => {
   const handleRoute = () => {
     navigate("/category/new");
   };
+
   const handleDelete = (id) => {
     dispatch(deleteCategory(id));
-    ToastError("Delete Successfully");
+    ToastSuccess("Delete Successfully");
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to the first page on search
+  };
+
+  const filteredCategories = categories?.filter((category) =>
+    category.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredCategories?.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredCategories?.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -38,10 +64,12 @@ const Category = () => {
         <div className="border rounded-lg overflow-hidden">
           <input
             type="text"
-            name=""
-            id=""
+            name="search"
+            id="search"
             className="border-none px-3 py-2 w-full"
             placeholder="Search..."
+            value={searchTerm}
+            onChange={handleSearchChange}
           />
         </div>
         <div>
@@ -91,13 +119,20 @@ const Category = () => {
                   Error: {isError}
                 </td>
               </tr>
-            ) : categories?.categories?.length === 0 ? (
-              <div className="p-3">You Need to Add the Category</div>
+            ) : filteredCategories?.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="4"
+                  className="whitespace-nowrap px-4 py-2 text-center text-gray-700"
+                >
+                  No categories found.
+                </td>
+              </tr>
             ) : (
-              categories?.categories?.map((item, i) => (
+              currentItems.map((item, i) => (
                 <tr key={i}>
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {i + 1}
+                    {indexOfFirstItem + i + 1}
                   </td>
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     {item.categoryName}
@@ -130,6 +165,31 @@ const Category = () => {
               ))
             )}
           </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan="4" className="px-4 py-2">
+                <div className="flex justify-start gap-2 items-center">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </>

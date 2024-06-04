@@ -1,15 +1,36 @@
+import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { addProduct } from "../redux/slice/product/productSlice";
 
 const AddProduct = () => {
   const navigate = useNavigate();
+  const [productName, setProductName] = useState("");
+  const [packSize, setPackSize] = useState("");
+  const [mrp, setMrp] = useState(0);
+  const [selectStatus, setSelectStatus] = useState("active");
+  const [productImage, setProductImage] = useState(null);
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state) => state.category);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newProduct = {
+      productName,
+      packSize,
+      mrp,
+      selectStatus,
+      productImage,
+    };
+    dispatch(addProduct(newProduct));
+    console.log(productImage, productName, mrp, selectStatus, packSize);
+  };
+
   return (
     <>
       <div className="max-w-[100%] mx-auto p-6 bg-white shadow-md rounded-lg h-[100%]">
-        <div
-          className="flex items-center justify-start gap-3 mb-6"
-          // onClick={navigate("/product")}
-        >
+        <div className="flex items-center justify-start gap-3 mb-6">
           <FaArrowLeft
             onClick={() => navigate("/product")}
             className="cursor-pointer"
@@ -17,7 +38,7 @@ const AddProduct = () => {
           <h2 className="text-xl font-semibold text-zinc-800">Add Product</h2>
           <span></span>
         </div>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <label
@@ -31,9 +52,13 @@ const AddProduct = () => {
                 name="category"
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
-                <option selected>Choose a category</option>
-                <option>Milk</option>
-                <option>Fruit</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category.categoryName}>
+                    {category.categoryName}
+                  </option>
+                ))}
+                {/* <option>Milk</option> */}
+                {/* <option>Fruit</option> */}
               </select>
             </div>
             <div>
@@ -47,6 +72,8 @@ const AddProduct = () => {
                 type="text"
                 name="productName"
                 id="productName"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 placeholder="Product Name"
               />
@@ -62,6 +89,8 @@ const AddProduct = () => {
                 type="text"
                 name="packSize"
                 id="packSize"
+                value={packSize}
+                onChange={(e) => setPackSize(e.target.value)}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 placeholder="Pack Size"
               />
@@ -79,6 +108,8 @@ const AddProduct = () => {
                 type="number"
                 name="mrp"
                 id="mrp"
+                value={mrp}
+                onChange={(e) => setMrp(Number(e.target.value))}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 placeholder="MRP"
               />
@@ -94,6 +125,7 @@ const AddProduct = () => {
                 type="file"
                 name="productImage"
                 id="productImage"
+                onChange={(e) => setProductImage(e.target.files[0])}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               />
             </div>
@@ -107,19 +139,27 @@ const AddProduct = () => {
               <select
                 id="status"
                 name="status"
+                value={selectStatus}
+                onChange={(e) => setSelectStatus(e.target.value)}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               >
-                <option selected>Choose a status</option>
-                <option>Active</option>
-                <option>inActive</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
           </div>
           <div className="flex justify-end gap-4">
-            <button className="py-2 px-4 rounded-lg bg-slate-100">
+            <button
+              type="button"
+              className="py-2 px-4 rounded-lg bg-slate-100"
+              onClick={() => navigate("/product")}
+            >
               Cancel
             </button>
-            <button className="py-2 px-4 rounded-lg bg-purple-600 text-white">
+            <button
+              type="submit"
+              className="py-2 px-4 rounded-lg bg-purple-600 text-white"
+            >
               Add
             </button>
           </div>
