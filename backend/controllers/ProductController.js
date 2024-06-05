@@ -1,55 +1,49 @@
 import ProductModel from "../models/ProductModel.js";
-import uploadFiletoCloudinary from "../utils/uploadFiletoCloudinary.js";
-// import { v2 as cloudinary } from "cloudinary";
+import CategoryModel from "../models/CategoryModel.js";
 
-// Configure Cloudinary
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_NAME,
-//   api_key: process.env.CLOUDINARY_KEY,
-//   api_secret: process.env.CLOUDINARY_SECRET,
-// });
+// Helper function to find category ID by name
+const findCategoryIdByName = async (categoryName) => {
+  if (!categoryName || typeof categoryName !== "string") {
+    throw new Error("Invalid category name");
+  }
+  console.log("category------------------->", categoryName);
 
-// // Helper function to upload file to Cloudinary
-// const uploadFiletoCloudinary = async (file) => {
-//   const result = await cloudinary.uploader.upload(file.path);
-//   return {
-//     url: result.secure_url,
-//     public_id: result.public_id,
-//   };
-// };
+  const normalizedCategoryName = categoryName.trim().toLowerCase();
+  console.log(
+    "normalizedCategoryName---------------->",
+    normalizedCategoryName
+  );
+  const category = await CategoryModel.findOne({
+    categoryName,
+  });
 
-// Add Product
+  console.log("data---------------->", category);
+
+  if (category) {
+    return category._id;
+  } else {
+    // Handle case where category is not found
+    throw new Error("Category not found");
+  }
+};
+
 export const AddProduct = async (req, res, next) => {
   try {
-    const { name, packSize, MRP, category } = req.body;
+    const { productName, packSize, mrp, selectStatus, category } = req.body;
 
-    // Check if file is provided
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "File is required" });
-    }
-
-    // Upload image to Cloudinary
-    const productImage = await uploadFiletoCloudinary(req.file);
-    console.log("Image----------------------->", productImage);
+    // Find the category ID based on the category name
+    const categoryId = await findCategoryIdByName(category);
 
     // Create a new product
     const newProduct = new ProductModel({
-      name,
+      name: productName,
       packSize,
-      MRP,
-      image: {
-        url: productImage.url,
-        public_id: productImage.public_id,
-      },
-      category,
+      MRP: mrp,
+      category: categoryId,
+      status: selectStatus,
     });
-    console.log("newProduct------------------------------->", newProduct);
 
-    // Save the product to the database
     const savedProduct = await newProduct.save();
-    console.log("savedProduct------------------------------->", savedProduct);
 
     // Respond with success
     res.status(201).json({
@@ -61,6 +55,8 @@ export const AddProduct = async (req, res, next) => {
     next(error);
   }
 };
+
+
 
 // Get All Products
 export const GetAllProducts = async (req, res, next) => {

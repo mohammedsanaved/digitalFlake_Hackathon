@@ -53,9 +53,9 @@ const Products = () => {
               <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 MRP
               </th>
-              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+              {/* <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 Image
-              </th>
+              </th> */}
               <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 Status
               </th>
@@ -75,9 +75,9 @@ const Products = () => {
                 Category
               </td>
               <td className="whitespace-nowrap px-4 py-2 text-gray-700">MRP</td>
-              <td className="whitespace-nowrap px-4 py-2 text-gray-700">
+              {/* <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                 Image
-              </td>
+              </td> */}
               <td className="whitespace-nowrap px-4 py-2 flex gap-6 items-center">
                 <span>Status</span>
                 <span className="p-2 hover:bg-slate-300 rounded-xl">

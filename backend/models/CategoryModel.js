@@ -15,6 +15,11 @@ const categorySchema = new mongoose.Schema({
     enum: ["active", "inactive"], // Status can only be active or inactive
     default: "active",
   },
+  // product: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "Product",
+  //   required: true,
+  // },
 });
 
 const CategoryModel = mongoose.model("Category", categorySchema);

@@ -7,7 +7,7 @@ import {
   deleteCategory,
   getAllCategory,
 } from "../redux/slice/category/categorySlice";
-import { ToastSuccess, ToastError } from "../components/UI/Toast";
+import { ToastSuccess } from "../components/UI/Toast";
 
 const Category = () => {
   const navigate = useNavigate();
@@ -16,12 +16,12 @@ const Category = () => {
     (state) => state.category
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [page, setpage] = useState(1);
+  const limit = 2;
 
   useEffect(() => {
-    dispatch(getAllCategory());
-  }, [dispatch]);
+    dispatch(getAllCategory(page, limit));
+  }, [dispatch, page]);
 
   const handleRoute = () => {
     navigate("/category/new");
@@ -34,24 +34,24 @@ const Category = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to the first page on search
+    setpage(1); // Reset to the first page on search
   };
 
-  const filteredCategories = categories?.filter((category) =>
+  const filteredCategories = categories?.rows?.filter((category) =>
     category.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = page * limit;
+  const indexOfFirstItem = indexOfLastItem - limit;
   const currentItems = filteredCategories?.slice(
     indexOfFirstItem,
     indexOfLastItem
   );
-  const totalPages = Math.ceil(filteredCategories?.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredCategories?.length / limit);
 
   const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    setpage(pageNumber);
   };
 
   return (
@@ -129,7 +129,7 @@ const Category = () => {
                 </td>
               </tr>
             ) : (
-              currentItems.map((item, i) => (
+              currentItems?.map((item, i) => (
                 <tr key={i}>
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     {indexOfFirstItem + i + 1}
@@ -170,19 +170,19 @@ const Category = () => {
               <td colSpan="4" className="px-4 py-2">
                 <div className="flex justify-start gap-2 items-center">
                   <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page === 1}
+                    className="px-3 py-1 bg-[#662671] rounded disabled:opacity-50 text-white"
                   >
                     Previous
                   </button>
                   <span>
-                    Page {currentPage} of {totalPages}
+                    Page {page} of {totalPages}
                   </span>
                   <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={page === totalPages}
+                    className="px-3 py-1 bg-[#662671] rounded disabled:opacity-50 text-white"
                   >
                     Next
                   </button>

@@ -10,7 +10,7 @@ const AddProduct = () => {
   const [packSize, setPackSize] = useState("");
   const [mrp, setMrp] = useState(0);
   const [selectStatus, setSelectStatus] = useState("active");
-  const [productImage, setProductImage] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.category);
 
@@ -21,10 +21,13 @@ const AddProduct = () => {
       packSize,
       mrp,
       selectStatus,
-      productImage,
+      category: categories?.rows?.find(
+        (category) => category.categoryName === selectedCategory
+      )._id,
     };
+    console.log("newProduct----------------------->", newProduct);
     dispatch(addProduct(newProduct));
-    console.log(productImage, productName, mrp, selectStatus, packSize);
+    navigate("/product");
   };
 
   return (
@@ -36,7 +39,6 @@ const AddProduct = () => {
             className="cursor-pointer"
           />
           <h2 className="text-xl font-semibold text-zinc-800">Add Product</h2>
-          <span></span>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -51,14 +53,15 @@ const AddProduct = () => {
                 id="category"
                 name="category"
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                value={selectedCategory}
               >
-                {categories.map((category) => (
+                <option value="">Select Category</option>
+                {categories?.rows?.map((category) => (
                   <option key={category._id} value={category.categoryName}>
                     {category.categoryName}
                   </option>
                 ))}
-                {/* <option>Milk</option> */}
-                {/* <option>Fruit</option> */}
               </select>
             </div>
             <div>
@@ -112,21 +115,6 @@ const AddProduct = () => {
                 onChange={(e) => setMrp(Number(e.target.value))}
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 placeholder="MRP"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="productImage"
-                className="block text-sm font-medium text-zinc-700"
-              >
-                Product Image
-              </label>
-              <input
-                type="file"
-                name="productImage"
-                id="productImage"
-                onChange={(e) => setProductImage(e.target.files[0])}
-                className="mt-1 block w-full py-2 px-3 border border-zinc-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
               />
             </div>
             <div>

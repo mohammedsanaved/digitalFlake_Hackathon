@@ -2,10 +2,15 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Thunks
-export const getAllCategory = createAsyncThunk("category/getAll", async () => {
-  const response = await axios.get("http://localhost:8000/api/v1/category/all");
-  return response.data.categories; // Adjust this if the data structure is different
-});
+export const getAllCategory = createAsyncThunk(
+  "category/getAll",
+  async (page, limit) => {
+    const response = await axios.get(
+      `http://localhost:8000/api/v1/category/all??page=${page}&limit=${limit}`
+    );
+    return response.data; // Adjust this if the data structure is different
+  }
+);
 
 export const fetchCategoryById = createAsyncThunk(
   "category/fetchById",
@@ -109,7 +114,7 @@ const categorySlice = createSlice({
       .addCase(deleteCategory.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isError = false;
-        state.categories = state.categories.filter(
+        state.categories = state?.categories?.filter(
           (category) => category.id !== action.payload.id
         );
       })

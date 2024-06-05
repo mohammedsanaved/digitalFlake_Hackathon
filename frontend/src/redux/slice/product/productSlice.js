@@ -29,7 +29,7 @@ const ProductSlice = createSlice({
       .addCase(addProduct.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isError = false;
-        state.categories.push(action.payload);
+        state.products.push(action.payload);
       })
       .addCase(addProduct.rejected, (state, action) => {
         state.isLoading = false;

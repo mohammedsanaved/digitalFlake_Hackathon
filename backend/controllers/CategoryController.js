@@ -87,6 +87,7 @@ export const GetAllCategories = async (req, res, next) => {
     next(error);
   }
 };
+// console.log("Data-------------------------->", ...res.PaginationResult);
 
 export const GetCategoryById = async (req, res, next) => {
   try {
