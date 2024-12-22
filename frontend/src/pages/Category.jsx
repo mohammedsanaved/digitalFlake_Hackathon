@@ -12,16 +12,16 @@ import { ToastSuccess } from "../components/UI/Toast";
 const Category = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { categories, isLoading, isError } = useSelector(
+  const { categories, isLoading, isError, pagination } = useSelector(
     (state) => state.category
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [page, setpage] = useState(1);
-  const limit = 2;
+  const [page, setPage] = useState(1);
+  const [limit] = useState(2);
 
   useEffect(() => {
-    dispatch(getAllCategory(page, limit));
-  }, [dispatch, page]);
+    dispatch(getAllCategory({ page, limit }));
+  }, [dispatch, page, limit]);
 
   const handleRoute = () => {
     navigate("/category/new");
@@ -34,24 +34,19 @@ const Category = () => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setpage(1); // Reset to the first page on search
+    setPage(1); // Reset to the first page on search
   };
 
-  const filteredCategories = categories?.rows?.filter((category) =>
-    category.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCategories = searchTerm
+    ? categories?.filter((category) =>
+        category.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : categories;
 
-  // Pagination logic
-  const indexOfLastItem = page * limit;
-  const indexOfFirstItem = indexOfLastItem - limit;
-  const currentItems = filteredCategories?.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(filteredCategories?.length / limit);
-
-  const handlePageChange = (pageNumber) => {
-    setpage(pageNumber);
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    // Scroll to top when page changes
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -98,6 +93,9 @@ const Category = () => {
               <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                 Status
               </th>
+              <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -129,10 +127,10 @@ const Category = () => {
                 </td>
               </tr>
             ) : (
-              currentItems?.map((item, i) => (
+              filteredCategories?.map((item, i) => (
                 <tr key={i}>
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                    {indexOfFirstItem + i + 1}
+                    {i + 1}
                   </td>
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     {item.categoryName}
@@ -140,7 +138,7 @@ const Category = () => {
                   <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                     {item.description}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-2 flex gap-6 items-center">
+                  <td className="whitespace-nowrap px-4 py-2 gap-6 items-center">
                     <span
                       style={{
                         color: item.status === "active" ? "green" : "red",
@@ -148,6 +146,8 @@ const Category = () => {
                     >
                       {item.status}
                     </span>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-2 gap-6 flex items-center">
                     <span className="p-2 hover:bg-blue-100 hover:shadow-lg rounded-xl duration-300 cursor-pointer">
                       <FaEdit
                         className="text-xl duration-300 text-blue-400"
@@ -167,25 +167,30 @@ const Category = () => {
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan="4" className="px-4 py-2">
-                <div className="flex justify-start gap-2 items-center">
-                  <button
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page === 1}
-                    className="px-3 py-1 bg-[#662671] rounded disabled:opacity-50 text-white"
-                  >
-                    Previous
-                  </button>
-                  <span>
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page === totalPages}
-                    className="px-3 py-1 bg-[#662671] rounded disabled:opacity-50 text-white"
-                  >
-                    Next
-                  </button>
+              <td colSpan="12" className="px-4 py-2">
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-2 items-center">
+                    <button
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1}
+                      className="px-3 py-1 bg-[#662671] rounded disabled:opacity-50 text-white"
+                    >
+                      Previous
+                    </button>
+                    <span>
+                      Page {pagination.currentPage} of {pagination.totalPages}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page === pagination.totalPages}
+                      className="px-3 py-1 bg-[#662671] rounded disabled:opacity-50 text-white"
+                    >
+                      Next
+                    </button>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Total items: {pagination.total}
+                  </div>
                 </div>
               </td>
             </tr>

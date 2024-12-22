@@ -4,11 +4,12 @@ import axios from "axios";
 // Thunks
 export const getAllCategory = createAsyncThunk(
   "category/getAll",
-  async (page, limit) => {
+  async ({ page, limit }) => {
+    // Change this to accept an object with page and limit
     const response = await axios.get(
-      `http://localhost:8000/api/v1/category/all??page=${page}&limit=${limit}`
+      `http://localhost:8000/api/v1/category/all?page=${page}&limit=${limit}`
     );
-    return response.data; // Adjust this if the data structure is different
+    return response.data;
   }
 );
 
@@ -18,10 +19,10 @@ export const fetchCategoryById = createAsyncThunk(
     const response = await axios.get(
       `http://localhost:8000/api/v1/category/${categoryId}`
     );
-    console.log(
-      response.data.category,
-      "responseByID------------------------>"
-    );
+    // console.log(
+    //   response.data.category,
+    //   "responseByID------------------------>"
+    // );
     return response.data.category;
   }
 );
@@ -63,6 +64,11 @@ const initialState = {
   category: null,
   isError: false,
   isLoading: false,
+  pagination: {
+    currentPage: 1,
+    totalPages: 0,
+    total: 0,
+  },
 };
 
 const categorySlice = createSlice({
@@ -76,7 +82,12 @@ const categorySlice = createSlice({
       })
       .addCase(getAllCategory.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.categories = action.payload;
+        state.categories = action.payload.categories;
+        state.pagination = {
+          currentPage: action.payload.currentPage,
+          totalPages: action.payload.totalPages,
+          total: action.payload.total,
+        };
       })
       .addCase(getAllCategory.rejected, (state, action) => {
         state.isLoading = false;

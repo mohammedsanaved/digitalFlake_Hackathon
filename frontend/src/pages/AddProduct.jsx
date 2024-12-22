@@ -1,33 +1,97 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { addProduct } from "../redux/slice/product/productSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  addProduct,
+  getProductById,
+  clearCurrentProduct,
+  updateProduct,
+} from "../redux/slice/product/productSlice";
+import axios from "axios";
+import { ToastSuccess } from "../components/UI/Toast";
 
 const AddProduct = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [productName, setProductName] = useState("");
   const [packSize, setPackSize] = useState("");
   const [mrp, setMrp] = useState(0);
   const [selectStatus, setSelectStatus] = useState("active");
   const [selectedCategory, setSelectedCategory] = useState("");
   const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.category);
+  const { product, isLoading, isError, errorMessage } = useSelector(
+    (state) => state.product
+  );
+  const [categories, setCategories] = useState([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [categoryError, setCategoryError] = useState(null);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (product) {
+      setProductName(product.name);
+      setPackSize(product.packSize);
+      setMrp(product.MRP);
+      setSelectStatus(product.status);
+      setSelectedCategory(product.category.categoryName);
+    }
+  }, [product]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setCategoryLoading(true);
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/v1/category/all"
+        );
+        setCategories(response.data.categories);
+        setCategoryError(null);
+      } catch (error) {
+        setCategoryError(
+          error.response?.data?.message || "Failed to fetch categories"
+        );
+      } finally {
+        setCategoryLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(getProductById(id));
+    }
+    return () => {
+      dispatch(clearCurrentProduct());
+    };
+  }, [dispatch, id]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newProduct = {
+    const productData = {
       productName,
       packSize,
       mrp,
       selectStatus,
-      category: categories?.rows?.find(
-        (category) => category.categoryName === selectedCategory
-      )._id,
+      category: selectedCategory,
     };
-    console.log("newProduct----------------------->", newProduct);
-    dispatch(addProduct(newProduct));
-    navigate("/product");
+
+    try {
+      if (id) {
+        await dispatch(
+          updateProduct({ id, updatedProduct: productData })
+        ).unwrap();
+        ToastSuccess("Product Updated Successfully");
+      } else {
+        await dispatch(addProduct(productData)).unwrap();
+        ToastSuccess("Product Added Successfully");
+      }
+      navigate("/product"); // Navigate only after successful operation
+    } catch (error) {
+      // Handle error if needed
+      console.error("Error:", error);
+    }
   };
 
   return (
@@ -38,7 +102,9 @@ const AddProduct = () => {
             onClick={() => navigate("/product")}
             className="cursor-pointer"
           />
-          <h2 className="text-xl font-semibold text-zinc-800">Add Product</h2>
+          <h2 className="text-xl font-semibold text-zinc-800">
+            {id ? "Edit Product" : " Add Product"}
+          </h2>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -55,14 +121,23 @@ const AddProduct = () => {
                 className="mt-1 block w-full py-2 px-3 border border-zinc-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 value={selectedCategory}
+                disabled={categoryLoading}
               >
                 <option value="">Select Category</option>
-                {categories?.rows?.map((category) => (
+                {categories.map((category) => (
                   <option key={category._id} value={category.categoryName}>
                     {category.categoryName}
                   </option>
                 ))}
               </select>
+              {categoryLoading && (
+                <div className="text-sm text-gray-500">
+                  Loading categories...
+                </div>
+              )}
+              {categoryError && (
+                <div className="text-sm text-red-500">{categoryError}</div>
+              )}
             </div>
             <div>
               <label
@@ -136,6 +211,8 @@ const AddProduct = () => {
               </select>
             </div>
           </div>
+          {isLoading && <div>Adding product...</div>}
+          {isError && <div className="text-red-500">{errorMessage}</div>}
           <div className="flex justify-end gap-4">
             <button
               type="button"
@@ -148,7 +225,7 @@ const AddProduct = () => {
               type="submit"
               className="py-2 px-4 rounded-lg bg-purple-600 text-white"
             >
-              Add
+              {id ? "Update" : "Add"}
             </button>
           </div>
         </form>

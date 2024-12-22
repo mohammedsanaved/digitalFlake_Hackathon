@@ -31,42 +31,68 @@ export const AddProduct = async (req, res, next) => {
   try {
     const { productName, packSize, mrp, selectStatus, category } = req.body;
 
-    // Find the category ID based on the category name
-    const categoryId = await findCategoryIdByName(category);
+    // Add validation
+    if (!productName || !packSize || !mrp || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
 
-    // Create a new product
+    // Find the category ID
+    const categoryDoc = await CategoryModel.findOne({ categoryName: category });
+    if (!categoryDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    // Create a new product with the found category ID
     const newProduct = new ProductModel({
       name: productName,
       packSize,
       MRP: mrp,
-      category: categoryId,
+      category: categoryDoc._id,
       status: selectStatus,
     });
 
     const savedProduct = await newProduct.save();
 
-    // Respond with success
+    // Populate the category details before sending response
+    const populatedProduct = await savedProduct.populate("category");
+
     res.status(201).json({
       success: true,
       message: "Product created successfully",
-      product: savedProduct,
+      product: populatedProduct,
     });
   } catch (error) {
     next(error);
   }
 };
 
-
-
 // Get All Products
 export const GetAllProducts = async (req, res, next) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+    const total = await ProductModel.countDocuments();
+
     // Retrieve all products from the database
-    const products = await ProductModel.find().populate("category");
+    const products = await ProductModel.find()
+      .skip(skip)
+      .limit(limit)
+      .populate("category");
 
     // Respond with the list of products
     res.status(200).json({
       success: true,
+      currentPage: page,
+      total,
+      totalPages: Math.ceil(total / limit),
       products,
     });
   } catch (error) {
@@ -79,26 +105,28 @@ export const GetAllProducts = async (req, res, next) => {
 export const UpdateProduct = async (req, res, next) => {
   try {
     const { productId } = req.params;
-    const { name, packSize, MRP, category } = req.body;
+    const { productName, packSize, mrp, selectStatus, category } = req.body;
 
-    // Check if a new file is provided for the update
-    let updatedData = { name, packSize, MRP, category };
-
-    if (req.file) {
-      // Upload new image to Cloudinary
-      const productImage = await uploadFiletoCloudinary(req.file);
-      updatedData.image = {
-        url: productImage.url,
-        public_id: productImage.public_id,
-      };
+    // Find category ID
+    const categoryDoc = await CategoryModel.findOne({ categoryName: category });
+    if (!categoryDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
     }
 
-    // Update the product
     const updatedProduct = await ProductModel.findByIdAndUpdate(
       productId,
-      updatedData,
+      {
+        name: productName,
+        packSize,
+        MRP: mrp,
+        status: selectStatus,
+        category: categoryDoc._id,
+      },
       { new: true, runValidators: true }
-    );
+    ).populate("category");
 
     if (!updatedProduct) {
       return res.status(404).json({
@@ -124,11 +152,6 @@ export const DeleteProduct = async (req, res, next) => {
 
     const deletedProduct = await ProductModel.findByIdAndDelete(productId);
 
-    // Remove image from Cloudinary
-    if (deletedProduct.image && deletedProduct.image.public_id) {
-      await cloudinary.uploader.destroy(deletedProduct.image.public_id);
-    }
-
     if (!deletedProduct) {
       return res.status(404).json({
         success: false,
@@ -139,6 +162,43 @@ export const DeleteProduct = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Product deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get All Categories
+export const GetAllCategories = async (req, res, next) => {
+  try {
+    // Simple fetch without pagination for dropdown
+    const categories = await CategoryModel.find({}, "categoryName");
+
+    res.status(200).json({
+      success: true,
+      categories,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const GetProductById = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await ProductModel.findById(productId).populate("category");
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      product,
     });
   } catch (error) {
     next(error);
