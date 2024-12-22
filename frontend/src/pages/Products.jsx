@@ -3,7 +3,11 @@ import { LuPackage } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllProducts } from "../redux/slice/product/productSlice";
+import {
+  deleteProduct,
+  getAllProducts,
+} from "../redux/slice/product/productSlice";
+import { ToastSuccess } from "../components/UI/Toast";
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -20,8 +24,9 @@ const Products = () => {
   const handleRoute = () => {
     navigate("/product/new");
   };
-  const handleDelete = () => {
-    alert("Delete");
+  const handleDelete = (id) => {
+    dispatch(deleteProduct(id));
+    ToastSuccess("Delete Successfully");
   };
   const handlePageChange = (pageNo) => {
     setPage(pageNo);
@@ -120,7 +125,7 @@ const Products = () => {
                   </span>
                   <span
                     className="p-2 hover:bg-slate-300 rounded-xl"
-                    onClick={handleDelete}
+                    onClick={() => handleDelete(product._id)}
                   >
                     <FaRegTrashAlt className="text-xl duration-300 text-red-500" />
                   </span>

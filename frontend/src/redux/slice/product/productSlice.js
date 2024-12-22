@@ -57,6 +57,14 @@ export const updateProduct = createAsyncThunk(
     }
   }
 );
+export const deleteProduct = createAsyncThunk(
+  "product/Delete",
+  async (id, { dispatch }) => {
+    await axios.delete(`http://localhost:8000/api/v1/product/delete/${id}`);
+    dispatch(getAllProducts());
+    return { id };
+  }
+);
 
 const initialState = {
   products: [],
@@ -147,6 +155,22 @@ const ProductSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.error.message || "Failed to update product";
+      })
+      .addCase(deleteProduct.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+      })
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isError = false;
+        state.products = state.products.filter(
+          (product) => product._id !== action.payload.id
+        );
+      })
+      .addCase(deleteProduct.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage = action.error.message || "Failed to delete product";
       });
   },
 });
